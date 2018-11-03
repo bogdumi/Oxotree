@@ -262,7 +262,7 @@ void display(game *g) {
     printf("  123\n");
     char abc[4] = "abc";
 	for(int i = 0; i < 3; i++){
-        printf("%c ", abc[i]);
+        printf("%c ", abgit branchc[i]);
 	 	for(int j = 0; j < 3; j++)
 	 		printf("%c", show(g -> grid[i][j]));
 	 	printf("\n");
