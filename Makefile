@@ -4,7 +4,7 @@ MacOS := $(findstring Darwin, $(shell uname -s))
 Windows := $(findstring NT, $(shell uname -s))
 
 # Specify what typing 'make' on its own will compile
-default: oxo
+default: oxotree
 
 # For Windows, add the .exe extension
 ifdef Windows
