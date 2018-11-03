@@ -1,4 +1,4 @@
-/* Play noughts and crosses (tic-tac-toe) between two human players. */
+/* Play noughts and crosses (tic-tac-toe) between a human and a computer */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,7 +7,7 @@
 #include <assert.h>
 
 //-----------------------------------------------------------------------------
-// Setting up types and constants.  Don't change this section.
+// Setting up types and constants.
 
 // Constants for player X, player O, and neither N.
 enum player { X, O, N };
@@ -27,8 +27,12 @@ struct game {
 };
 typedef struct game game;
 
+// Keep track of human and computer player
+player human = N;
+player comp = N;
+
 //-----------------------------------------------------------------------------
-// Functions providing the logic of the game.  Develop these.
+// Functions providing the logic of the game.
 
 // Initialize a game, with the given player to move first.
 void newGame(game *g, player first) {
@@ -42,7 +46,6 @@ void newGame(game *g, player first) {
 
 // Convert the letter in a valid move string such as "b2" into a row index.
 int row(char *text) {
-
 	int r = text[0] - 'a';
 	return r;
 
@@ -51,11 +54,18 @@ int row(char *text) {
 
 // Convert the digit in a valid move string such as "b2" into a column index.
 int col(char *text) {
-
 	int c = text[1] - '1';
 	return c;
 
     return -1;
+}
+
+// Convert indices into a valid move string
+void indicesToMove(int r, int c, char *m){
+    m[0] = r + 'a';
+    m[1] = c + '1';
+    m[2] = '\0';
+    return;
 }
 
 // Check whether a move string typed in by the user such as "b2" is valid, and
@@ -82,6 +92,18 @@ void move(game *g, int r, int c) {
 	g -> moves++;
 
 	if(g -> next == X)
+		g -> next = O;
+	else
+		g -> next = X;
+	return;
+}
+
+void unmove(game *g, int r, int c){
+    g -> grid[r][c] = N;
+
+    g -> moves--;
+
+    if(g -> next == X)
 		g -> next = O;
 	else
 		g -> next = X;
@@ -131,6 +153,83 @@ bool draw(game *g) {
 }
 
 //-----------------------------------------------------------------------------
+// Minimax functions
+
+// Return max number
+int max(int a, int b){
+    if (a > b)
+        return a;
+    return b;
+}
+
+// Return min number
+int min(int a, int b){
+    if (a > b)
+        return b;
+    return a;
+}
+
+int score(game *g){
+    if (win(g) == comp)
+        return 10 - g -> moves;
+    else if (win(g) == human)
+        return g -> moves - 10;
+    else
+        return 0;
+}
+
+// Minimax implementation: runs all possible games onwards from a given position
+int minimax(game *g){
+    if(win(g) != N || draw(g))
+        return score(g);
+    
+    if(g -> next == comp){
+        int scoremax = -100000;
+        for(int i = 0; i < 3; i++)
+            for(int j = 0; j < 3; j++)
+                if(g -> grid[i][j] == N){
+                    move(g, i, j);
+                    scoremax = max(scoremax, minimax(g));
+                    unmove(g, i, j);
+                }
+        return scoremax;
+    }
+    else{
+        int scoremin = 100000;
+        for(int i = 0; i < 3; i++)
+            for(int j = 0; j < 3; j++)
+                if(g -> grid[i][j] == N){
+                    move(g, i, j);
+                    scoremin = min(scoremin, minimax(g));
+                    unmove(g, i, j);
+                }
+        return scoremin;
+    }
+}
+
+// Find the best possible move
+void findMove(game *g, char *m){
+    int r = -1, c = -1;
+    int bestscore = -100000;
+
+    for(int i = 0; i < 3; i++)
+        for(int j = 0; j < 3; j++)
+            if(g -> grid[i][j] == N){
+                move(g, i, j);
+                int currentscore = minimax(g);
+                unmove(g, i, j);
+
+                if(currentscore > bestscore){
+                    r = i;
+                    c = j;
+                    bestscore = currentscore;
+                }
+            }
+    indicesToMove(r, c, m);
+    return;
+}
+
+//-----------------------------------------------------------------------------
 // Playing the game: Don't change this section until after submitting.
 
 // Convert a player constant into a character for printing.
@@ -159,9 +258,9 @@ void display(game *g) {
 	}
 }
 
-// Ask the current player for their move, putting it into the given array.
+// Ask the player for their move, putting it into the given array.
 // Ask repeatedly until the user types in a valid move.
-void ask(game *g, char text[100]) {
+void ask(game *g) {
     printf("Player %c enter a move: ", show(g -> next));
 	char ch[20];
     fgets(ch, 20, stdin);
@@ -179,16 +278,23 @@ void ask(game *g, char text[100]) {
     return;
 }
 
-// Play the game interactively between two human players who take turns.
+// Play the game interactively between a human and a computer who take turns.
 void play(char player) {
 	game gamedata;
     game *g = &gamedata;
+    human = player;
+    if(human == X)
+        comp = O;
+    else
+        comp = X;
+
     enum player winner = win(g);
-    char moves[100] = "";
+
 	newGame(g, player);
     display(g);
+
     while(g -> moves < 9){
-        ask(g, moves);
+        ask(g);
         display(g);
         winner = win(g);
         if(winner != N)
@@ -202,10 +308,47 @@ void play(char player) {
 }
 
 //-----------------------------------------------------------------------------
-// Testing and running: Don't change this section.
+// Testing and running.
+
+// Set up a game structure with given contents.  The grid is given as a string
+// of the form "XO- -XO X-X", then the next player, then the number of moves.
+// Work out the number of moves made and the player to move next.
+void setup(game *g, char *grid) {
+    int xs = 0, os = 0, moves = 0;
+    for (int r=0; r<3; r++) {
+        for (int c=0; c<3; c++) {
+            char ch = grid[r*4 + c];
+            if (ch == 'X') { g->grid[r][c] = X; xs++; moves++; }
+            else if (ch == 'O') { g->grid[r][c] = O; os++; moves++; }
+            else g->grid[r][c] = N;
+        }
+    }
+    g->moves = moves;
+    if (xs == os || xs == os - 1) g->next = X;
+    else if (xs == os + 1) g->next = O;
+    else printf("Setup problem\n");
+}
+
+// Test the score function
+void testScores(game *g){
+    human = X;
+    comp = O;
+
+    setup(g, "XXX OO- -OO");
+    assert(score(g) < 0);
+
+    setup(g, "OOO XX- -XX");
+    assert(score(g) > 0);
+
+    setup(g, "XOX OO- -XO");
+    assert(score(g) == 0);
+}
 
 void test(){
-
+    game *g = malloc(sizeof(game));
+    testScores(g);
+    free(g);
+    printf("All tests passed.\n");
 }
 
 // Run the program with no args to carry out the tests, or with one arg (the
