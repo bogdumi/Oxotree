@@ -237,6 +237,17 @@ char show(player c) {
     return (c == X) ? 'X' : (c == O) ? 'O' : '-';
 }
 
+// Convert validity into string for printing
+void errMessage(validity err, char *mess){
+    switch(err){
+        case BadFormat: strcpy(mess, "BadFormat"); break;
+        case BadLetter: strcpy(mess, "BadLetter"); break;
+        case BadDigit: strcpy(mess, "BadDigit"); break;
+        case BadCell: strcpy(mess, "BadCell"); break;
+    }
+    return;
+}
+
 // Print a validity error message.
 void printInvalid(validity v) {
     if (v == BadFormat) printf("Type a letter and a digit");
@@ -262,12 +273,15 @@ void display(game *g) {
 // Ask repeatedly until the user types in a valid move.
 void ask(game *g) {
     printf("Player %c enter a move: ", show(g -> next));
-	char ch[20];
-    fgets(ch, 20, stdin);
+	char ch[200];
+    fgets(ch, 200, stdin);
     ch[2] = '\0';
 	while(valid(g, ch) != OK){
-		printf("Please enter a valid move: ");
-		fgets(ch, 20, stdin);
+        validity error = valid(g, ch);
+        char mess[10];
+        errMessage(error, mess);
+		printf("Please enter a valid move (%s. Correct format example is \"b2\"): ", mess);
+		fgets(ch, 200, stdin);
         ch[2] = '\0';
 	}
     
@@ -369,10 +383,25 @@ void testMinimax(game *g){
     assert(minimax(g) > 0);
 }
 
+void testFindMove(game *g){
+    human = X;
+    comp = O;
+    char m[3];
+
+    setup(g, "X-- OO- X-O");
+    findMove(g, m);
+    assert(strcmp("a2", m) == 0);
+
+    setup(g, "O-- XX- O-X");
+    findMove(g, m);
+    assert(strcmp("b3", m) == 0);
+}
+
 void test(){
     game *g = malloc(sizeof(game));
     testScores(g);
     testMinimax(g);
+    testFindMove(g);
     free(g);
     printf("All tests passed.\n");
 }
