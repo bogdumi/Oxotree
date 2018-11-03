@@ -271,8 +271,8 @@ void ask(game *g) {
         ch[2] = '\0';
 	}
     
-    char r = row(ch);
-    char c = col(ch);
+    int r = row(ch);
+    int c = col(ch);
 
     move(g, r, c);
     return;
@@ -282,6 +282,7 @@ void ask(game *g) {
 void play(char player) {
 	game gamedata;
     game *g = &gamedata;
+
     human = player;
     if(human == X)
         comp = O;
@@ -290,11 +291,23 @@ void play(char player) {
 
     enum player winner = win(g);
 
-	newGame(g, player);
+	newGame(g, X);
     display(g);
 
     while(g -> moves < 9){
-        ask(g);
+        if(g -> next == human)
+            ask(g);
+        else{
+            char m[3];
+            findMove(g, m);
+
+            printf("Player %c enter a move: ", show(g -> next));
+            printf("%s\n", m);
+
+            int r = row(m);
+            int c = col(m);
+            move(g, r, c);
+        }
         display(g);
         winner = win(g);
         if(winner != N)
@@ -344,9 +357,22 @@ void testScores(game *g){
     assert(score(g) == 0);
 }
 
+// Test the minimax function
+void testMinimax(game *g){
+    human = X;
+    comp = O;
+
+    setup(g, "XX- O-- -OO");
+    assert(minimax(g) < 0);
+
+    setup(g, "OO- X-- -XX");
+    assert(minimax(g) > 0);
+}
+
 void test(){
     game *g = malloc(sizeof(game));
     testScores(g);
+    testMinimax(g);
     free(g);
     printf("All tests passed.\n");
 }
