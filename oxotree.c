@@ -98,6 +98,7 @@ void move(game *g, int r, int c) {
 	return;
 }
 
+// Restore a move made at a given valid position
 void unmove(game *g, int r, int c){
     g -> grid[r][c] = N;
 
@@ -169,6 +170,7 @@ int min(int a, int b){
     return a;
 }
 
+// Calculate score based on depth and winning player
 int score(game *g){
     if (win(g) == comp)
         return 10 - g -> moves;
@@ -237,34 +239,29 @@ char show(player c) {
     return (c == X) ? 'X' : (c == O) ? 'O' : '-';
 }
 
-// Convert validity into string for printing
-void errMessage(validity err, char *mess){
-    switch(err){
-        case BadFormat: strcpy(mess, "BadFormat"); break;
-        case BadLetter: strcpy(mess, "BadLetter"); break;
-        case BadDigit: strcpy(mess, "BadDigit"); break;
-        case BadCell: strcpy(mess, "BadCell"); break;
-    }
-    return;
-}
-
 // Print a validity error message.
 void printInvalid(validity v) {
     if (v == BadFormat) printf("Type a letter and a digit");
     else if (v == BadLetter) printf("Type a letter a, b or c");
     else if (v == BadDigit) printf("Type a digit 1, 2 or 3");
     else if (v == BadCell) printf("Choose an empty cell");
-    printf("\n");
 }
 
 // Display the grid.
 void display(game *g) {
-    printf("  123\n");
-    char abc[4] = "abc";
+	
+	// Uncomment to play without game history visible:
+	// system("clr");
+	// or, for Windows:
+	// system("clear");
+
+
+    printf("  | 1 | 2 | 3 |\n");
+    char abc[10] = "abc ";
 	for(int i = 0; i < 3; i++){
-        printf("%c ", abgit branchc[i]);
+		printf("%c | ", abc[i]);
 	 	for(int j = 0; j < 3; j++)
-	 		printf("%c", show(g -> grid[i][j]));
+	 		printf("%c | ", show(g -> grid[i][j]));
 	 	printf("\n");
 	}
 }
@@ -278,9 +275,9 @@ void ask(game *g) {
     ch[2] = '\0';
 	while(valid(g, ch) != OK){
         validity error = valid(g, ch);
-        char mess[10];
-        errMessage(error, mess);
-		printf("Please enter a valid move (%s. Correct format example is \"b2\"): ", mess);
+		printf("Please enter a valid move (");
+		printInvalid(error);
+		printf("): ");
 		fgets(ch, 200, stdin);
         ch[2] = '\0';
 	}
@@ -384,8 +381,6 @@ void testMinimax(game *g){
 }
 
 void testFindMove(game *g){
-    human = X;
-    comp = O;
     char m[3];
 
     setup(g, "X-- OO- X-O");
