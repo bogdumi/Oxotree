@@ -1,6 +1,6 @@
 # Oxotree
 
-“oxotree.c” is a modified version of “oxo.c”. Instead of a noughts and crosses game between two players, it is a noughts and crosses game between a human player and the computer.
+`oxotree.c` is a modified version of `oxo.c`. Instead of a noughts and crosses game between two players, it is a noughts and crosses game between a human player and the computer.
 
 ## Install
 
@@ -8,7 +8,7 @@ A Makefile is included in the repo with the necessary flags, and it will work on
 
 ## Running
 
-The program is run with “./oxotree X” or “./oxotree O”,  so that the human player chooses whether they want to go first or second. X always goes first. The player has to input the coordinates of the cell they want to play.
+The program is run with `./oxotree X` or `./oxotree O`,  so that the human player chooses whether they want to go first or second. X always goes first. The player has to input the coordinates of the cell they want to play.
 
 ## Extra info
 
@@ -18,6 +18,6 @@ Testing of the additional functions is done with “./oxotree”, however, the f
 
 ## Resources used:
 
-Game tree: https://en.wikipedia.org/wiki/Game_tree
+- Game tree: https://en.wikipedia.org/wiki/Game_tree
 
-Minimax algorithm: https://en.wikipedia.org/wiki/Minimax
+- Minimax algorithm: https://en.wikipedia.org/wiki/Minimax
