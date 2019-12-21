@@ -1,6 +1,6 @@
 # Oxotree
 
-`oxotree.c` is a modified version of `oxo.c`. Instead of a noughts and crosses game between two players, it is a noughts and crosses game between a human player and the computer.
+`oxotree.c` is a modified version of Tic-Tac-Toe. Instead of a noughts and crosses game between two players, it is a noughts and crosses game between a human player and the computer.
 
 ## Install
 
